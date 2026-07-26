@@ -1,0 +1,10 @@
+From reading the writeup and the pdf I understand that the following is the pipline of what we are supposed to do.
+(Not comprehensive)
+Extarct Data from api(s) -> clean, preprocess the data to form features -> train a model to predict future AQI
+->built a frontend to display graphs and data and predictions -> cicd every hour to update model.
+
+First step I will be extracting data and making features from it.
+I used the following APIs
+1- AQICN : as recommended
+2- Open-Meteo : As i have found that open weather only has data from last 5 days only. To get more you have to have a paid tier.
+
