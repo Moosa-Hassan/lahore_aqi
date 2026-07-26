@@ -10,3 +10,9 @@ I used the following APIs
 
 Now i will only be using open-meteo as i seem to blocked by AQICN or rate limited which would not work with the cicd
  part so im solely relying on open meteo
+
+I got data from the aqi endpoint for pollutant in air and weather data as that also dictates how the aqi changes.
+
+Next i merged data from both based on timestamp and engineered features from them.
+First i dervied day, hour month details from timestamp, then created historical data for each record (aqi from hour/day ago), 
+calculated average and rolling average and dropped rows with Nan values for clean dataset.
