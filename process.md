@@ -128,3 +128,6 @@ The graph I have seems to have a sharp spike which is causing the xgboost model 
 ![alt text](image.png) 
 
 I will be trying a little furthur back in data to see if the spike is the reason for high error. otherwise the model is closly following the real graph, its just shifted. After trying weighting the aqi as it performs relatively well for a few hours then some other tricks with hyperparameters. The model is not improving much. But ive noticed that the initail predictions are good while later ones deviate as is expected. As I will be giving the model the correct values when they become available, i repredict the 72 precictions as we get new values and the graph improves but it still has a high mae.
+
+Given that the initial mae is around 5 I believe the model works well. initial predictions work well which means that as model would get actual aqi readings it would improve. Hence model has been trained and downloaded from colab.
+

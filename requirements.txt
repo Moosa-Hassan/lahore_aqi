@@ -1,7 +1,12 @@
-requests
+confluent-kafka
 pandas
 numpy
+requests
 matplotlib
 seaborn
-hopworks
-confluent-kafka
+scikit-learn
+xgboost
+joblib
+hopsworks
+python-dotenv
+streamlit
