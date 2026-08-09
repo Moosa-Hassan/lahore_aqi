@@ -11,3 +11,4 @@ hopsworks
 python-dotenv
 streamlit
 shap
+streamlit
