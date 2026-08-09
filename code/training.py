@@ -16,6 +16,7 @@ import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
 
+
 import hopsworks
 import xgboost as xgb
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
@@ -36,10 +37,11 @@ def load_features():
     project = hopsworks.login(api_key_value=os.environ["HOPSWORKS_API_KEY"])
     fs = project.get_feature_store()
     fg = fs.get_feature_group(FEATURE_GROUP_NAME, version=FEATURE_GROUP_VERSION)
-    df = fg.read()
+
+    df = fg.read(read_options={"use_hive": True})
+
     df = df.sort_values("timestamp").reset_index(drop=True)
     return df, project
-
 
 # ============================================================
 # 2. Build targets + feature columns
@@ -87,9 +89,9 @@ def train_models(train_df, val_df, feature_cols):
 
         model = xgb.XGBRegressor(
             objective="reg:squarederror",
-            n_estimators=600,
+            n_estimators=250,
             learning_rate=0.03,
-            max_depth=6,
+            max_depth=5,
             subsample=0.8,
             colsample_bytree=0.8,
             reg_lambda=1.0,
