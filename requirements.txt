@@ -1,14 +1,3 @@
-confluent-kafka
+streamlit
 pandas
-numpy
-requests
 matplotlib
-seaborn
-scikit-learn
-xgboost
-joblib
-hopsworks
-python-dotenv
-streamlit
-shap
-streamlit
