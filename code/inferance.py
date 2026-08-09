@@ -61,6 +61,18 @@ def load_latest_model(project, max_retries=3):
     print(f"Loaded model '{MODEL_NAME}' v{model.version}, trained_at={bundle['trained_at']}")
     return bundle
 
+
+def read_feature_group_with_retry(feature_group, max_retries=3):
+    for attempt in range(1, max_retries + 1):
+        try:
+            return feature_group.read()
+        except Exception as e:
+            print(f"Feature group read attempt {attempt} failed: {e}")
+            if attempt == max_retries:
+                raise
+            print("Retrying...")
+
+
 # ============================================================
 # 2. Load latest feature row from feature store
 # ============================================================
