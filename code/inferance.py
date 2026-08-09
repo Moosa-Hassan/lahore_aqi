@@ -67,7 +67,7 @@ def load_latest_model(project, max_retries=3):
 def load_latest_features(project, feature_cols):
     fs = project.get_feature_store()
     fg = fs.get_feature_group(FEATURE_GROUP_NAME, version=FEATURE_GROUP_VERSION)
-    df = fg.read()
+    df = fg.read(read_options={"use_hive": True})   # <-- added
     df = df.sort_values("timestamp").reset_index(drop=True)
 
     latest_row = df.iloc[-1]
@@ -79,7 +79,6 @@ def load_latest_features(project, feature_cols):
 
     feats = latest_row[feature_cols].values.reshape(1, -1)
     return feats, latest_timestamp
-
 
 # ============================================================
 # 3. Predict 72h forward
