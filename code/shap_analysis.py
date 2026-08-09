@@ -39,7 +39,7 @@ def load_background_data(feature_cols):
     project = hopsworks.login(api_key_value=os.environ["HOPSWORKS_API_KEY"])
     fs = project.get_feature_store()
     fg = fs.get_feature_group("aqi_features", version=6)
-    df = fg.read(read_options={"use_hive": True})
+    df = read_feature_group_with_retry(fg)
     df = df.sort_values("timestamp").reset_index(drop=True)
 
     missing = [c for c in feature_cols if c not in df.columns]

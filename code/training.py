@@ -38,7 +38,7 @@ def load_features():
     fs = project.get_feature_store()
     fg = fs.get_feature_group(FEATURE_GROUP_NAME, version=FEATURE_GROUP_VERSION)
 
-    df = fg.read(read_options={"use_hive": True})
+    df = read_feature_group_with_retry(fg)
 
     df = df.sort_values("timestamp").reset_index(drop=True)
     return df, project
