@@ -30,6 +30,17 @@ MODEL_DIR = "models"
 MODEL_BUNDLE_PATH = os.path.join(MODEL_DIR, "aqi_xgb_72h.joblib")
 
 
+def read_feature_group_with_retry(feature_group, max_retries=3):
+    for attempt in range(1, max_retries + 1):
+        try:
+            return feature_group.read()
+        except Exception as e:
+            print(f"Feature group read attempt {attempt} failed: {e}")
+            if attempt == max_retries:
+                raise
+            print("Retrying...")
+
+
 # ============================================================
 # 1. Load features from Hopsworks
 # ============================================================
