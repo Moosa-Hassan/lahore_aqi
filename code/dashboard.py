@@ -12,6 +12,7 @@ import os
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 FORECAST_PATH = "predictions/latest_forecast.csv"
 
@@ -108,25 +109,46 @@ else:
 # ============================================================
 st.subheader("72-Hour Forecast")
 
-fig, ax = plt.subplots(figsize=(14, 5))
+fig, ax = plt.subplots(figsize=(14, 5), dpi=100)
 
+# stronger, clearer line and markers
 ax.plot(forecast_df["timestamp"], forecast_df["predicted_aqi"],
-        color="crimson", linewidth=2, marker="o", markersize=3)
+        color="#b71c1c", linewidth=2.6, marker="o", markersize=4,
+        markerfacecolor="#fff5f5", markeredgewidth=0.8)
 
-# shade AQI category bands
+# shade AQI category bands with more prominent color and slight transparency
 bands = [(0, 50, "#00e400"), (50, 100, "#ffff00"), (100, 150, "#ff7e00"),
          (150, 200, "#ff0000"), (200, 300, "#8f3f97"), (300, 500, "#7e0023")]
 for low, high, c in bands:
-    ax.axhspan(low, high, color=c, alpha=0.08)
+    ax.axhspan(low, high, color=c, alpha=0.22, linewidth=0)
+    # draw soft boundary lines for clarity
+    ax.hlines([low, high], forecast_df["timestamp"].min(), forecast_df["timestamp"].max(),
+              colors=[c], linestyles='-', alpha=0.12)
 
-ax.axvline(forecast_df["timestamp"].iloc[23], color="gray", linestyle="--", alpha=0.5)
-ax.axvline(forecast_df["timestamp"].iloc[47], color="gray", linestyle="--", alpha=0.5)
+# vertical separators between days
+ax.axvline(forecast_df["timestamp"].iloc[23], color="gray", linestyle="--", alpha=0.7, linewidth=1)
+ax.axvline(forecast_df["timestamp"].iloc[47], color="gray", linestyle="--", alpha=0.7, linewidth=1)
 
-ax.set_xlabel("Time")
-ax.set_ylabel("US AQI")
+# Axis styling: labels, ticks, spines
+ax.set_xlabel("Time", fontsize=12, fontweight='semibold')
+ax.set_ylabel("AQI", fontsize=12, fontweight='semibold')
 ax.set_ylim(0, max(300, forecast_df["predicted_aqi"].max() * 1.15))
-ax.grid(alpha=0.3)
-fig.autofmt_xdate()
+
+ax.tick_params(axis='both', which='major', labelsize=10)
+for spine in ax.spines.values():
+    spine.set_linewidth(1.1)
+
+# Improve grid visibility
+ax.grid(True, linestyle='--', linewidth=0.6, alpha=0.5)
+
+# Better x-axis date formatting: major ticks every 12 hours, minor every 3 hours
+locator_major = mdates.HourLocator(interval=12)
+locator_minor = mdates.HourLocator(interval=3)
+fmt = mdates.DateFormatter('%m-%d %H:%M')
+ax.xaxis.set_major_locator(locator_major)
+ax.xaxis.set_major_formatter(fmt)
+ax.xaxis.set_minor_locator(locator_minor)
+fig.autofmt_xdate(rotation=30)
 
 st.pyplot(fig)
 
