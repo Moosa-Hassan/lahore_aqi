@@ -5,6 +5,9 @@ on:
     - cron: "0 * * * *"   # every hour, on the hour
   workflow_dispatch: {}     # allows manual trigger from GitHub UI
 
+permissions:
+  contents: write
+
 concurrency:
   group: hourly-pipeline
   cancel-in-progress: false 
@@ -16,6 +19,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
+          ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
           persist-credentials: true
 

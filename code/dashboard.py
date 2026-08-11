@@ -49,7 +49,7 @@ def load_forecast():
 
 forecast_df = load_forecast()
 
-st.title("🌫️ Lahore AQI Forecast — Next 72 Hours")
+st.title("Lahore AQI Forecast — Next 72 Hours")
 
 if forecast_df is None:
     st.error(
@@ -95,14 +95,14 @@ hazardous_hours = forecast_df[forecast_df["predicted_aqi"] >= HAZARD_THRESHOLD]
 if len(hazardous_hours) > 0:
     first_hazard = hazardous_hours.iloc[0]
     st.error(
-        f"⚠️ **Hazardous AQI alert:** AQI is predicted to reach "
+        f"**Hazardous AQI alert:** AQI is predicted to reach "
         f"**{first_hazard['predicted_aqi']:.0f}** "
         f"({aqi_category(first_hazard['predicted_aqi'])[0]}) "
         f"around **{first_hazard['timestamp'].strftime('%A %I %p')}**. "
         f"{len(hazardous_hours)} hour(s) in the next 72h cross this threshold."
     )
 else:
-    st.success(f"✅ No hours in the next 72h are predicted to reach hazardous levels (AQI ≥ {HAZARD_THRESHOLD}).")
+    st.success(f"No hours in the next 72h are predicted to reach hazardous levels (AQI ≥ {HAZARD_THRESHOLD}).")
 
 # ============================================================
 # Forecast chart
