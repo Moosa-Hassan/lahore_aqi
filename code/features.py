@@ -98,7 +98,7 @@ def fetch_raw_data(days, lag_days=5):
     lat, lon, city = get_city_coordinates(CITY)
     print(f"Coordinates for {city}: lat={lat}, lon={lon}")
 
-    end_date = datetime.now() - timedelta(days=lag_days)
+    end_date = datetime.now()
     start_date = end_date - timedelta(days=days)
 
     df_aqi = fetch_aqi_data(lat, lon, start_date, end_date)
