@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 import shutil
+from datetime import datetime, timezone
 import hopsworks
 
 load_dotenv()
@@ -111,6 +112,10 @@ def forecast_next_72h(bundle, feats, latest_timestamp):
         "timestamp": future_timestamps,
         "predicted_aqi": preds,
     })
+    # Store the actual pipeline generation time so the dashboard can report
+    # freshness instead of estimating it from the first forecast timestamp.
+    forecast_df["forecast_generated_at_utc"] = datetime.now(timezone.utc).isoformat()
+    forecast_df["data_as_of"] = latest_timestamp
     return forecast_df
 
 
@@ -139,4 +144,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main() 

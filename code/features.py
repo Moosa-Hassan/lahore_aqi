@@ -91,6 +91,66 @@ def fetch_weather_data(lat, lon, start_date, end_date):
     })
 
 
+def fetch_live_aqi_data(lat, lon, past_hours=240, forecast_hours=1):
+    """Fetch recent/current AQI data from the live Air Quality Forecast API.
+
+    Unlike the archive API, this endpoint is continuously updated and supports
+    past_hours/forecast_hours, so the latest feature row can stay close to now.
+    """
+    url = "https://air-quality-api.open-meteo.com/v1/air-quality"
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "hourly": "us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,dust",
+        "past_hours": past_hours,
+        "forecast_hours": forecast_hours,
+        "timezone": "auto",
+    }
+    response = requests.get(url, params=params, timeout=30)
+    response.raise_for_status()
+    data = response.json()
+    if "hourly" not in data:
+        raise ValueError(f"Open-Meteo live AQI API error: {data}")
+
+    return pd.DataFrame({
+        "timestamp": pd.to_datetime(data["hourly"]["time"]),
+        "us_aqi": data["hourly"]["us_aqi"],
+        "pm25": data["hourly"]["pm2_5"],
+        "pm10": data["hourly"]["pm10"],
+        "co": data["hourly"]["carbon_monoxide"],
+        "no2": data["hourly"]["nitrogen_dioxide"],
+        "so2": data["hourly"]["sulphur_dioxide"],
+        "o3": data["hourly"]["ozone"],
+        "dust": data["hourly"]["dust"],
+    })
+
+
+def fetch_live_weather_data(lat, lon, past_hours=240, forecast_hours=1):
+    """Fetch recent/current weather from the live Weather Forecast API."""
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation",
+        "past_hours": past_hours,
+        "forecast_hours": forecast_hours,
+        "timezone": "auto",
+    }
+    response = requests.get(url, params=params, timeout=30)
+    response.raise_for_status()
+    data = response.json()
+    if "hourly" not in data:
+        raise ValueError(f"Open-Meteo live weather API error: {data}")
+
+    return pd.DataFrame({
+        "timestamp": pd.to_datetime(data["hourly"]["time"]),
+        "temperature_c": data["hourly"]["temperature_2m"],
+        "humidity_pct": data["hourly"]["relative_humidity_2m"],
+        "wind_speed_kmh": data["hourly"]["wind_speed_10m"],
+        "precipitation_mm": data["hourly"]["precipitation"],
+    })
+
+
 def fetch_raw_data(days, lag_days=5):
     """
     lag_days: archive APIs need a few days' lag before data is finalized,
@@ -210,10 +270,18 @@ def main():
         print(f"Running backfill for {args.days} days...")
         df_raw = fetch_raw_data(days=args.days)
     else:
-        # hourly mode: only need enough lookback to compute lag_72 + rolling_24h
-        # safety margin of a few extra days
-        print("Running hourly incremental fetch...")
-        df_raw = fetch_raw_data(days=10)
+        # Live mode: use forecast APIs with recent history instead of archive APIs.
+        # This avoids the multi-day lag of finalized archive/reanalysis data.
+        print("Running live hourly fetch...")
+        lat, lon, city = get_city_coordinates(CITY)
+        print(f"Coordinates for {city}: lat={lat}, lon={lon}")
+
+        df_aqi = fetch_live_aqi_data(lat, lon, past_hours=240, forecast_hours=1)
+        df_weather = fetch_live_weather_data(lat, lon, past_hours=240, forecast_hours=1)
+
+        df_raw = pd.merge(df_aqi, df_weather, on="timestamp", how="inner")
+        df_raw = df_raw.sort_values("timestamp").reset_index(drop=True)
+        print(f"Latest live source timestamp: {df_raw['timestamp'].iloc[-1]}")
 
     print(f"Raw data: {df_raw.shape}")
     df_features = create_features(df_raw)

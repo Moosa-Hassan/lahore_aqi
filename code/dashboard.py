@@ -58,8 +58,23 @@ if forecast_df is None:
     )
     st.stop()
 
-generated_at = forecast_df["timestamp"].iloc[0] - pd.Timedelta(hours=1)
-st.caption(f"Forecast generated from data as of **{generated_at}**")
+data_as_of = pd.to_datetime(forecast_df["data_as_of"].iloc[0]) if "data_as_of" in forecast_df.columns else forecast_df["timestamp"].iloc[0] - pd.Timedelta(hours=1)
+forecast_generated_at = (
+    pd.to_datetime(forecast_df["forecast_generated_at_utc"].iloc[0], utc=True)
+    if "forecast_generated_at_utc" in forecast_df.columns else None
+)
+
+col_a, col_b = st.columns(2)
+with col_a:
+    st.caption(f"Data available through **{data_as_of}**")
+with col_b:
+    if forecast_generated_at is not None:
+        st.caption(f"Forecast generated **{forecast_generated_at.strftime('%Y-%m-%d %H:%M UTC')}**")
+    else:
+        st.caption("Forecast generation time unavailable in this older forecast file")
+
+if st.button("🔄 Refresh dashboard"):
+    st.rerun()
 
 # ============================================================
 # Current / next-hour AQI summary card
