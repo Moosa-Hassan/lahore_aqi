@@ -255,7 +255,7 @@ def write_to_feature_store(df):
     )
 
     feature_group.insert(df, write_options={"wait_for_job": True})
-    print(f"Wrote {len(df)} rows to feature group 'aqi_features' v5")
+    print(f"Wrote {len(df)} rows to feature group 'aqi_features' v6")
 
 # ============================================================
 # 4. Entry point
@@ -284,8 +284,10 @@ def main():
         print(f"Latest live source timestamp: {df_raw['timestamp'].iloc[-1]}")
 
     print(f"Raw data: {df_raw.shape}")
+    print(f"Latest 10 data points:\n{df_raw.tail(10)}")
     df_features = create_features(df_raw)
     print(f"Feature data: {df_features.shape}")
+    print(df_features.tail(5))
 
     write_to_feature_store(df_features)
 
